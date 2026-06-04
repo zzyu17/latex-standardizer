@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# ============================================================================
+# latex-standardizer git pre-commit hook
+#
+# Runs standardize.sh --check on staged .tex files.
+# Blocks commit if violations are found.
+#
+# Install:
+#   cp scripts/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+# ============================================================================
+
+STANDARDIZE="$(cd "$(dirname "$0")" && pwd)/../scripts/standardize.sh"
+
+# Get list of staged .tex files
+STAGED_TEX=$(git diff --cached --name-only --diff-filter=ACM | grep '\.tex$' || true)
+
+if [[ -z "$STAGED_TEX" ]]; then
+    exit 0
+fi
+
+echo "======================================================"
+echo "latex-standardizer pre-commit: checking .tex files..."
+echo "======================================================"
+
+VIOLATIONS=0
+for f in $STAGED_TEX; do
+    if [[ -f "$f" ]]; then
+        "$STANDARDIZE" --check "$f" || VIOLATIONS=$((VIOLATIONS + 1))
+    fi
+done
+
+echo "------------------------------------------------------"
+if [[ $VIOLATIONS -gt 0 ]]; then
+    echo ""
+    echo "LaTeX style violations found in $VIOLATIONS file(s)."
+    echo "Please run the following to auto-fix:"
+    echo ""
+    echo "  $STANDARDIZE --in-place $STAGED_TEX"
+    echo ""
+    echo "Then stage the changes and commit again."
+    exit 1
+fi
+
+echo "All .tex files pass style checks."
+exit 0

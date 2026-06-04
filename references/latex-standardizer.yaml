@@ -1,0 +1,93 @@
+# latex-standardizer configuration
+# General LaTeX formatting rules
+
+# --- Post-processing: Sentence splitting ---
+sentence_split:
+  enabled: true
+  abbreviation_whitelist:
+    - "e.g."
+    - "i.e."
+    - "cf."
+    - "vs."
+    - "Dr."
+    - "Prof."
+    - "Mr."
+    - "Mrs."
+    - "Ms."
+    - "et al."
+    - "etc."
+    - "Fig."
+    - "Eq."
+    - "Eqs."
+    - "Tab."
+    - "Sec."
+    - "Ref."
+    - "Refs."
+    - "No."
+    - "Vol."
+    - "ed."
+    - "eds."
+    - "et"
+    - "ibid."
+    - "viz."
+    - "ca."
+    - "approx."
+    - "inc."
+    - "corp."
+    - "Jr."
+    - "Sr."
+    - "a.k.a."
+    - "i.a."
+
+# --- Post-processing: Blank line insertion before semantic blocks ---
+blank_line_before:
+  sections:
+    - "\\section"
+    - "\\subsection"
+    - "\\subsubsection"
+    - "\\paragraph"
+    - "\\subparagraph"
+  environments:
+    - "\\begin{itemize}"
+    - "\\begin{enumerate}"
+    - "\\begin{description}"
+    - "\\begin{equation}"
+    - "\\begin{align}"
+    - "\\begin{align*}"
+    - "\\begin{equation*}"
+    - "\\begin{figure}"
+    - "\\begin{figure*}"
+    - "\\begin{table}"
+    - "\\begin{table*}"
+    - "\\begin{deluxetable}"
+    - "\\begin{deluxetable*}"
+    - "\\begin{verbatim}"
+    - "\\begin{lstlisting}"
+    - "\\begin{center}"
+
+# --- Post-processing: Line wrapping ---
+line_wrap:
+  max_chars: 80
+  split_at_sentence: true
+
+# --- Post-processing: Preamble organization ---
+preamble:
+  group_packages: true
+  group_commands: true
+  sort_packages: true
+
+# --- latexindent: Indentation ---
+defaultIndent: "  "
+
+# --- latexindent: Whitespace ---
+removeTrailingWhitespace:
+  beforeProcessing: 1
+  afterProcessing: 1
+
+modifyLineBreaks:
+  preserveBlankLines: 1
+  condenseMultipleBlankLinesInto: 1
+
+# --- latexindent: Tab handling ---
+replace:
+  tabs: 1
