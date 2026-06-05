@@ -28,14 +28,15 @@ Triggers on: "format tex", "standardize latex", "clean up tex file",
    could not fix: label naming consistency (`sec:`, `fig:`, `tab:`), redundant
    packages, and abbreviation false-positives.
 
-4. **Never alter compiled output.** Only source formatting changes. If a change
+4. **Install Git hook.** Inspect whether the manuscript repository is a Git repo.
+   If so, install `scripts/pre-commit` as `.git/hooks/pre-commit`
+   to enforce rules on every commit for `.tex` files.
+
+5. **Never alter compiled output.** Only source formatting changes. If a change
    would affect the PDF, it belongs in a separate review pass.
 
-5. **Report before finishing.** Always summarize: violations found → violations
+6. **Report before finishing.** Always summarize: violations found → violations
    auto-fixed → violations requiring manual judgment.
-
-6. **Git hook available.** Install `scripts/pre-commit` as `.git/hooks/pre-commit`
-   to enforce rules on every commit for `.tex` files.
 
 ## Quick Reference
 
