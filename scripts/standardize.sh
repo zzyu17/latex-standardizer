@@ -6,6 +6,8 @@
 #   1. Post-processing (best-effort: sentence splitting, blank lines,
 #      preamble grouping)
 #   2. latexindent (deterministic: indent, whitespace, environment alignment)
+#   3. AASTeX v7 validation (auto-detected: deprecated commands, forbidden
+#      packages, structural metadata checks)
 #
 # Usage:
 #   standardize.sh [--check] [--in-place] <file.tex> [<file2.tex> ...]
@@ -21,6 +23,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 CONFIG_YAML="${SKILL_DIR}/references/latex-standardizer.yaml"
 POST_PROCESSOR="${SKILL_DIR}/scripts/_post_process.py"
+AASTEX_VALIDATOR="${SKILL_DIR}/scripts/_aastex_validate.py"
 
 # Colors for output
 RED=$'\033[0;31m'
@@ -31,6 +34,7 @@ NC=$'\033[0m' # No Color
 CHECK_MODE=false
 IN_PLACE=false
 FILES=()
+HAS_AASTEX=false
 
 usage() {
     cat <<EOF
@@ -84,11 +88,27 @@ if [[ ! -f "$CONFIG_YAML" ]]; then
     exit 1
 fi
 
-# --- Core function: format one file (PP → latexindent, single pass) ---
+# --- Helper: detect AASTeX v7 document class ---
+is_aastex_file() {
+    grep -q '\\documentclass.*{aastex7' "$1" 2>/dev/null
+}
+
+# --- Detect if any file is AASTeX v7 (for header) ---
+for f in "${FILES[@]}"; do
+    if is_aastex_file "$f"; then
+        HAS_AASTEX=true
+        break
+    fi
+done
+
+# --- Core function: format one file (PP → latexindent → AASTeX v7, single pass) ---
 run_pipeline() {
     local texfile="$1"
     python3 "$POST_PROCESSOR" --in-place "$texfile" "$CONFIG_YAML" || return 1
     latexindent -l="$CONFIG_YAML" -s -w "$texfile" 2>/dev/null || true
+    if is_aastex_file "$texfile"; then
+        python3 "$AASTEX_VALIDATOR" --in-place "$texfile" 2>/dev/null || true
+    fi
     return 0
 }
 
@@ -126,6 +146,15 @@ except UnicodeDecodeError:
             echo "    ${YELLOW}[FAIL]${NC} File would be modified by formatting"
             ((violations++))
         fi
+        if is_aastex_file "$texfile"; then
+            aastex_out=$(python3 "$AASTEX_VALIDATOR" --check "$tmpfile" 2>&1) || true
+            if [[ -n "$aastex_out" ]]; then
+                echo "$aastex_out"
+                # Count error-level violations (lines with [ERROR])
+                aastex_errors=$(echo "$aastex_out" | grep -c '\[ERROR\]' || true)
+                violations=$((violations + aastex_errors))
+            fi
+        fi
         rm -f "$tmpfile"
     elif $IN_PLACE; then
         run_pipeline "$texfile" || {
@@ -133,13 +162,28 @@ except UnicodeDecodeError:
             return 1
         }
         echo "    ${GREEN}[OK]${NC} Formatting applied (PP→latexindent)"
+        if is_aastex_file "$texfile"; then
+            aastex_out=$(python3 "$AASTEX_VALIDATOR" --check "$texfile" 2>&1) || true
+            aastex_errors=$(echo "$aastex_out" | grep -c '\[ERROR\]' || true)
+            if [[ "$aastex_errors" -gt 0 ]]; then
+                echo "$aastex_out"
+                echo "    ${YELLOW}[WARN]${NC} AASTeX: $aastex_errors error(s) require manual fix"
+                ((violations += aastex_errors))
+            else
+                echo "    ${GREEN}[OK]${NC} AASTeX validation passed"
+            fi
+        fi
     fi
 
     return $violations
 }
 
 # --- Main ---
-echo "latex-standardizer (General LaTeX Rules)"
+if $HAS_AASTEX; then
+    echo "latex-standardizer (General LaTeX Rules + AASTeX v7 Rules)"
+else
+    echo "latex-standardizer (General LaTeX Rules)"
+fi
 echo "====================================================="
 
 total_violations=0

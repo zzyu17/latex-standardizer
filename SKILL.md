@@ -47,4 +47,6 @@ Triggers on: "format tex", "standardize latex", "clean up tex file",
 | YAML config                    | `references/latex-standardizer.yaml` |
 | Main formatting script         | `scripts/standardize.sh`             |
 | Post-processing helper         | `scripts/_post_process.py`           |
+| AASTeX v7 specific rules       | `aastex.md`                          |
+| AASTeX v7 validator            | `scripts/_aastex_validate.py`        |
 | Git pre-commit hook            | `scripts/pre-commit`                 |
