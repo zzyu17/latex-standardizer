@@ -5,12 +5,24 @@
 # Runs standardize.sh --check on staged .tex files.
 # Blocks commit if violations are found.
 #
-# Install:
-#   cp scripts/pre-commit .git/hooks/pre-commit
+# Install (from your manuscript repo):
+#   ln -s /path/to/latex-standardizer/scripts/pre-commit .git/hooks/pre-commit
 #   chmod +x .git/hooks/pre-commit
 # ============================================================================
 
-STANDARDIZE="$(cd "$(dirname "$0")" && pwd)/../scripts/standardize.sh"
+# Resolve the real script path (follows symlinks) so we can find the
+# skill directory regardless of where the hook is installed
+HOOK_REAL="$(readlink -f "$0")"
+HOOK_DIR="$(cd "$(dirname "$HOOK_REAL")" && pwd)"
+STANDARDIZE="$HOOK_DIR/standardize.sh"
+
+# Ensure standardize.sh is reachable
+if [[ ! -x "$STANDARDIZE" ]]; then
+    echo "ERROR: standardize.sh not found at: $STANDARDIZE" >&2
+    echo "The pre-commit hook must be a symlink to the skill's scripts/pre-commit." >&2
+    echo "Re-create it: ln -s /path/to/latex-standardizer/scripts/pre-commit .git/hooks/pre-commit" >&2
+    exit 1
+fi
 
 # Get list of staged .tex files
 STAGED_TEX=$(git diff --cached --name-only --diff-filter=ACM | grep '\.tex$' || true)

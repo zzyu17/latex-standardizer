@@ -60,8 +60,7 @@ scripts/standardize.sh path/to/your/manuscript.tex
 To ensure your `.tex` files are always standardized before committing, use the provided pre-commit hook:
 
 ```bash
-cp scripts/pre-commit .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+ln -s "$(readlink -f scripts/pre-commit)" .git/hooks/pre-commit
 ```
 
 Or just activate the skill, the assistant will automatically deploy the pre-commit hook for you.
