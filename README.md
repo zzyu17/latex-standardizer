@@ -44,6 +44,26 @@ git checkout master
 git checkout aastex
 ```
 
+## Updating
+
+To update an installed copy of this skill:
+
+```bash
+cd <skills-directory>/latex-standardizer
+git fetch origin
+
+# Update the branch you need:
+# For the `master` branch, directly pull the latest changes:
+git checkout master
+git pull origin master
+
+# For the `aastex` branch, you should use rebase:
+git checkout aastex
+git rebase origin/aastex
+```
+
+After the rebase, reload the skill via `/skill reload` or restart via `/restart` in the Copilot CLI session.
+
 ## Usage
 
 ### As an AI Skill
