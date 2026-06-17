@@ -63,7 +63,7 @@ To ensure your `.tex` files are always standardized before committing, use the p
 ln -s "$(readlink -f scripts/pre-commit)" .git/hooks/pre-commit
 ```
 
-Or just activate the skill, the assistant will automatically deploy the pre-commit hook for you.
+Or just activate the skill — the assistant will detect your Git repo, ask whether you want to install the hook and install it via symlink for you if you approve.
 
 ## Configuration
 
